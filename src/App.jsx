@@ -12,8 +12,11 @@ function App() {
 
   const [forecast, setForecast] = useState([])
 
+  const [searchInput, setSearchInput] = useState('')
+
   useEffect(() => {
     const fetchWeatherData = async (cityName) => {
+      setCity(cityName)
       try {
         const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${API_KEY}&units=imperial`;
         const response = await fetch(url)
@@ -23,7 +26,7 @@ function App() {
 
         const forecastResponse = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${cityName}&appid=${API_KEY}&units=imperial`)
         
-        const forecastData = await response.json(forecastResponse)
+        const forecastData = await forecastResponse.json()
 
         const dailyForecast = forecastData.list.filter(
           (item, index) => index % 8 === 0 // выбирается запись каждые 3 часа -> 8 записей в день -> 5 дней
@@ -40,6 +43,18 @@ function App() {
 
   return (
     <div className="wrapper">
+      <form className="search-form">
+        <input
+          type="text"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          placeholder="Enter city name"
+          className="search-input"
+        />
+        <button type="submit" className="search-button">
+          Search
+        </button>
+      </form>
       {weatherData && weatherData.main && weatherData.weather && (
     <>
         <div className="header">
@@ -75,6 +90,7 @@ function App() {
               src={`http://openweathermap.org/img/wn/${item.weather[0].icon}.png`}
               alt={item.weather[0].description}
             />
+            <p>{Math.round(item.main.temp)}°F</p>
             </div>
           ))}
         </div>
