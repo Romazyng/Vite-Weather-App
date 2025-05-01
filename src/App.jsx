@@ -8,16 +8,20 @@ function App() {
 
   const [weatherData, setWeatherData] = useState(null)
 
-  const [city, setCity] = useState('london')
+  const [city, setCity] = useState('')
 
   const [forecast, setForecast] = useState([])
 
   const [searchInput, setSearchInput] = useState('')
 
-  useEffect(() => {
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+
     const fetchWeatherData = async (cityName) => {
       setCity(cityName)
       try {
+        setLoading(true)
+        setError(null)
         const url = `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${API_KEY}&units=imperial`;
         const response = await fetch(url)
         const data = await response.json()
@@ -34,16 +38,27 @@ function App() {
         setForecast(dailyForecast)
       } 
       catch (err) {
-        console.log(err.message)
+        setError(err)
+        console.log(error)
+      } finally {
+        setLoading(false)
       }
     }
-    fetchWeatherData(city)
+    useEffect(() => {
+      fetchWeatherData(city)
+    },[city])
 
-  },[city])
+    const handleSearch = (e) => {
+      e.preventDefault()
+      fetchWeatherData(searchInput)
+    }
+
+  if (loading) return <div className="wrapper">Loading...</div>
 
   return (
     <div className="wrapper">
-      <form className="search-form">
+      <form onSubmit={handleSearch} className="search-form">
+      {error && <p className="error">{error}</p>}
         <input
           type="text"
           value={searchInput}
